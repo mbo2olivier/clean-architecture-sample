@@ -1,0 +1,56 @@
+@page
+@model Cnss.Affiliation.Portal.Pages.AttachEmployeeToEmployerModel
+@{
+    ViewData["Title"] = "Attacher un employé";
+}
+
+<div class="container py-4">
+    <h1 class="h2 mb-4">Attacher un employé à un employeur</h1>
+
+    @if (!string.IsNullOrWhiteSpace(Model.SuccessMessage))
+    {
+        <div class="alert alert-success">@Model.SuccessMessage</div>
+    }
+
+    @if (!string.IsNullOrWhiteSpace(Model.ErrorMessage))
+    {
+        <div class="alert alert-danger">@Model.ErrorMessage</div>
+    }
+
+    <form method="post" class="card shadow-sm">
+        <div class="card-body">
+            <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+
+            <div class="mb-3">
+                <label asp-for="Input.EmployerIdentifier" class="form-label"></label>
+                <input asp-for="Input.EmployerIdentifier" class="form-control" />
+                <span asp-validation-for="Input.EmployerIdentifier" class="text-danger"></span>
+            </div>
+
+            <div class="mb-3">
+                <label asp-for="Input.EmployeeRegistrationNumber" class="form-label"></label>
+                <input asp-for="Input.EmployeeRegistrationNumber" class="form-control" />
+                <span asp-validation-for="Input.EmployeeRegistrationNumber" class="text-danger"></span>
+            </div>
+
+            <div class="mb-3">
+                <label asp-for="Input.FirstName" class="form-label"></label>
+                <input asp-for="Input.FirstName" class="form-control" />
+                <span asp-validation-for="Input.FirstName" class="text-danger"></span>
+            </div>
+
+            <div class="mb-3">
+                <label asp-for="Input.LastName" class="form-label"></label>
+                <input asp-for="Input.LastName" class="form-control" />
+                <span asp-validation-for="Input.LastName" class="text-danger"></span>
+            </div>
+
+            <button type="submit" class="btn btn-primary">Attacher</button>
+            <a asp-page="/Index" class="btn btn-link">Retour</a>
+        </div>
+    </form>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

@@ -1,0 +1,44 @@
+@page
+@model Cnss.Affiliation.Portal.Pages.AffiliateEmployerModel
+@{
+    ViewData["Title"] = "Affilier un employeur";
+}
+
+<div class="container py-4">
+    <h1 class="h2 mb-4">Affilier un employeur</h1>
+
+    @if (!string.IsNullOrWhiteSpace(Model.SuccessMessage))
+    {
+        <div class="alert alert-success">@Model.SuccessMessage</div>
+    }
+
+    @if (!string.IsNullOrWhiteSpace(Model.ErrorMessage))
+    {
+        <div class="alert alert-danger">@Model.ErrorMessage</div>
+    }
+
+    <form method="post" class="card shadow-sm">
+        <div class="card-body">
+            <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+
+            <div class="mb-3">
+                <label asp-for="Input.RegistrationNumber" class="form-label"></label>
+                <input asp-for="Input.RegistrationNumber" class="form-control" />
+                <span asp-validation-for="Input.RegistrationNumber" class="text-danger"></span>
+            </div>
+
+            <div class="mb-3">
+                <label asp-for="Input.CompanyName" class="form-label"></label>
+                <input asp-for="Input.CompanyName" class="form-control" />
+                <span asp-validation-for="Input.CompanyName" class="text-danger"></span>
+            </div>
+
+            <button type="submit" class="btn btn-primary">Affilier</button>
+            <a asp-page="/Index" class="btn btn-link">Retour</a>
+        </div>
+    </form>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

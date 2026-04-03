@@ -1,0 +1,33 @@
+﻿@page
+@model IndexModel
+@{
+    ViewData["Title"] = "Portal Affiliation";
+}
+
+<div class="container py-4">
+    <div class="mb-4">
+        <h1 class="display-5">CNSS Affiliation Portal</h1>
+        <p class="lead">Démonstration Razor Pages du bounded context Affiliation.</p>
+    </div>
+
+    <div class="row g-4">
+        <div class="col-md-6">
+            <div class="card h-100 shadow-sm">
+                <div class="card-body">
+                    <h2 class="h4">Affilier un employeur</h2>
+                    <p>Créer un employeur CNSS à partir du portail.</p>
+                    <a class="btn btn-primary" asp-page="/AffiliateEmployer">Ouvrir le formulaire</a>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="card h-100 shadow-sm">
+                <div class="card-body">
+                    <h2 class="h4">Attacher un employé</h2>
+                    <p>Rattacher un employé à un employeur existant.</p>
+                    <a class="btn btn-outline-primary" asp-page="/AttachEmployeeToEmployer">Ouvrir le formulaire</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

@@ -8,6 +8,8 @@ public interface IAffiliationRepository
 
     Task<Employer?> GetEmployerAsync(string employerIdentifier, CancellationToken cancellationToken = default);
 
+    Task UpdateEmployerAsync(Employer employer, CancellationToken cancellationToken = default);
+
     Task AddEmployeeAsync(Employee employee, CancellationToken cancellationToken = default);
 
     Task<Employee?> GetEmployeeAsync(string employeeIdentifier, CancellationToken cancellationToken = default);

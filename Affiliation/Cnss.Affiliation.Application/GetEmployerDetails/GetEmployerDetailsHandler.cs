@@ -1,8 +1,9 @@
 using Cnss.Affiliation.Domain.Repositories;
+using Cnss.Shared.Application.GetEmployerDetails;
 using FluentValidation;
 using MDiator;
 
-namespace Cnss.Shared.Application.GetEmployerDetails;
+namespace Cnss.Affiliation.Application.GetEmployerDetails;
 
 public sealed class GetEmployerDetailsHandler : IMDiatorHandler<GetEmployerDetailsRequest, GetEmployerDetailsResponse>
 {

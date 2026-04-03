@@ -1,6 +1,7 @@
+using Cnss.Shared.Application.GetEmployerEmployeesDetails;
 using FluentValidation;
 
-namespace Cnss.Shared.Application.GetEmployerEmployeesDetails;
+namespace Cnss.Affiliation.Application.GetEmployerEmployeesDetails;
 
 public sealed class GetEmployerEmployeesDetailsRequestValidator : AbstractValidator<GetEmployerEmployeesDetailsRequest>
 {

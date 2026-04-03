@@ -53,4 +53,23 @@ public sealed class Declaration : AggregateRoot<string>
         IsPublished = true;
         AddDomainEvent(new DeclarationPublishedEvent(Identifier, EmployerIdentifier.Value, Period.ToString(), TotalAmount));
     }
+
+    public static Declaration Restore(
+        string identifier,
+        EmployerIdentifier employerIdentifier,
+        DeclarationPeriod period,
+        IReadOnlyCollection<DeclarationItem> items,
+        bool isPublished)
+    {
+        var declaration = new Declaration(identifier, employerIdentifier, period);
+
+        foreach (var item in items)
+        {
+            declaration._items.Add(item);
+        }
+
+        declaration.IsPublished = isPublished;
+        declaration.ClearDomainEvents();
+        return declaration;
+    }
 }

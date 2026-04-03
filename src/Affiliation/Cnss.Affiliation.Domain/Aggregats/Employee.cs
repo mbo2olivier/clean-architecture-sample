@@ -40,6 +40,24 @@ public sealed class Employee : AggregateRoot<string>
             lastName.Trim());
     }
 
+    public static Employee Restore(
+        string identifier,
+        string registrationNumber,
+        string firstName,
+        string lastName,
+        string? employerIdentifier)
+    {
+        var employee = Create(identifier, registrationNumber, firstName, lastName);
+
+        if (!string.IsNullOrWhiteSpace(employerIdentifier))
+        {
+            employee.EmployerIdentifier = employerIdentifier.Trim();
+        }
+
+        employee.ClearDomainEvents();
+        return employee;
+    }
+
     internal void AttachToEmployer(string employerIdentifier)
     {
         EnsureRequired(employerIdentifier, nameof(employerIdentifier));

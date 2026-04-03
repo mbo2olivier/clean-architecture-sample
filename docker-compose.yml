@@ -1,0 +1,15 @@
+services:
+  database:
+    image: postgres:16-alpine
+    container_name: cnss-postgres
+    environment:
+      POSTGRES_DB: cnss
+      POSTGRES_USER: cnss
+      POSTGRES_PASSWORD: cnss
+    ports:
+      - "5432:5432"
+    volumes:
+      - cnss-postgres-data:/var/lib/postgresql/data
+
+volumes:
+  cnss-postgres-data:

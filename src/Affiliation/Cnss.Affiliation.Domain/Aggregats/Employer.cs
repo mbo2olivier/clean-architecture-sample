@@ -33,6 +33,24 @@ public sealed class Employer : AggregateRoot<string>
         return employer;
     }
 
+    public static Employer Restore(
+        string identifier,
+        string registrationNumber,
+        string companyName,
+        IReadOnlyCollection<Employee> employees)
+    {
+        var employer = new Employer(identifier.Trim(), registrationNumber.Trim().ToUpperInvariant(), companyName.Trim());
+
+        foreach (var employee in employees)
+        {
+            employee.AttachToEmployer(employer.Identifier);
+            employer._employeeIdentifiers.Add(employee.Identifier);
+        }
+
+        employer.ClearDomainEvents();
+        return employer;
+    }
+
     public void AttachEmployee(Employee employee)
     {
         ArgumentNullException.ThrowIfNull(employee);

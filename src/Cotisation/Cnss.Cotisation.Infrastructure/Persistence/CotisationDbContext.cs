@@ -86,5 +86,33 @@ public sealed class CotisationDbContext : DbContext
 
             builder.HasIndex(x => x.DeclarationIdentifier);
         });
+
+        modelBuilder.Entity<CotisationDeclarationRecord>().HasData(
+            new CotisationDeclarationRecord
+            {
+                Identifier = "DEC-0001",
+                EmployerIdentifier = "EMP-0001",
+                Year = 2026,
+                Month = 3,
+                IsPublished = true
+            });
+
+        modelBuilder.Entity<CotisationDeclarationItemRecord>().HasData(
+            new CotisationDeclarationItemRecord
+            {
+                Identifier = "DIT-0001",
+                DeclarationIdentifier = "DEC-0001",
+                EmployeeIdentifier = "SAL-0001",
+                GrossSalary = 1500m,
+                Amount = 75m
+            },
+            new CotisationDeclarationItemRecord
+            {
+                Identifier = "DIT-0002",
+                DeclarationIdentifier = "DEC-0001",
+                EmployeeIdentifier = "SAL-0002",
+                GrossSalary = 2000m,
+                Amount = 100m
+            });
     }
 }

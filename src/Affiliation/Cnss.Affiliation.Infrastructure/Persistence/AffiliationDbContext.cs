@@ -82,5 +82,32 @@ public sealed class AffiliationDbContext : DbContext
 
             builder.HasIndex(x => x.EmployerIdentifier);
         });
+
+        modelBuilder.Entity<AffiliationEmployerRecord>().HasData(
+            new AffiliationEmployerRecord
+            {
+                Identifier = "EMP-0001",
+                RegistrationNumber = "RCCM-001",
+                CompanyName = "ACME SARL",
+                EmployeeIdentifiers = ["SAL-0001", "SAL-0002"]
+            });
+
+        modelBuilder.Entity<AffiliationEmployeeRecord>().HasData(
+            new AffiliationEmployeeRecord
+            {
+                Identifier = "SAL-0001",
+                RegistrationNumber = "MAT-001",
+                FirstName = "John",
+                LastName = "Doe",
+                EmployerIdentifier = "EMP-0001"
+            },
+            new AffiliationEmployeeRecord
+            {
+                Identifier = "SAL-0002",
+                RegistrationNumber = "MAT-002",
+                FirstName = "Jane",
+                LastName = "Doe",
+                EmployerIdentifier = "EMP-0001"
+            });
     }
 }

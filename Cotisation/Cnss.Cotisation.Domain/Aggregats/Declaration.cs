@@ -51,6 +51,6 @@ public sealed class Declaration : AggregateRoot<string>
         }
 
         IsPublished = true;
-        AddEvent(new DeclarationPublishedEvent(Identifier, EmployerIdentifier.Value, Period.ToString(), TotalAmount));
+        AddDomainEvent(new DeclarationPublishedEvent(Identifier, EmployerIdentifier.Value, Period.ToString(), TotalAmount));
     }
 }

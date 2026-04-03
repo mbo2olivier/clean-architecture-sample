@@ -29,7 +29,7 @@ public sealed class Employer : AggregateRoot<string>
         EnsureRequired(companyName, nameof(companyName));
 
         var employer = new Employer(identifier.Trim(), registrationNumber.Trim().ToUpperInvariant(), companyName.Trim());
-        employer.AddEvent(new EmployerAffiliatedEvent(employer.Identifier, employer.RegistrationNumber, employer.CompanyName));
+        employer.AddDomainEvent(new EmployerAffiliatedEvent(employer.Identifier, employer.RegistrationNumber, employer.CompanyName));
         return employer;
     }
 
@@ -44,7 +44,7 @@ public sealed class Employer : AggregateRoot<string>
 
         employee.AttachToEmployer(Identifier);
         _employeeIdentifiers.Add(employee.Identifier);
-        AddEvent(new EmployeeAttachedToEmployeeEvent(Identifier, employee.Identifier));
+        AddDomainEvent(new EmployeeAttachedToEmployeeEvent(Identifier, employee.Identifier));
     }
 
     private static void EnsureRequired(string value, string parameterName)

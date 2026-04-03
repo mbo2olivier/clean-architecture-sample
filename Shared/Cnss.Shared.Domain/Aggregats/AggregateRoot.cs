@@ -6,16 +6,16 @@ namespace Cnss.Shared.Domain.Aggregats;
 public abstract class AggregateRoot<TId> : Entity<TId>
     where TId : notnull
 {
-    private readonly List<IDomainEvent> _events = [];
+    private readonly List<IDomainEvent> _domainEvents = [];
 
     protected AggregateRoot(TId id)
         : base(id)
     {
     }
 
-    public IReadOnlyCollection<IDomainEvent> Events => _events.AsReadOnly();
+    public IReadOnlyCollection<IDomainEvent> DomainEvents => _domainEvents.AsReadOnly();
 
-    protected void AddEvent(IDomainEvent domainEvent) => _events.Add(domainEvent);
+    protected void AddDomainEvent(IDomainEvent domainEvent) => _domainEvents.Add(domainEvent);
 
-    public void ClearEvents() => _events.Clear();
+    public void ClearDomainEvents() => _domainEvents.Clear();
 }

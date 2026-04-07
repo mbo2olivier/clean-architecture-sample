@@ -3,10 +3,14 @@ using Cnss.Shared.Domain.Events;
 
 namespace Cnss.Shared.Domain.Aggregats;
 
-public abstract class AggregateRoot<TId> : Entity<TId>
+public abstract class AggregateRoot<TId> : Entity<TId>, IAggregateRoot
     where TId : notnull
 {
     private readonly List<IDomainEvent> _domainEvents = [];
+
+    protected AggregateRoot()
+    {
+    }
 
     protected AggregateRoot(TId id)
         : base(id)

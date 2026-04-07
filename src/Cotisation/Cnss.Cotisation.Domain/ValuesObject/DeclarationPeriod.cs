@@ -4,6 +4,10 @@ namespace Cnss.Cotisation.Domain.ValuesObject;
 
 public sealed class DeclarationPeriod : ValueObject
 {
+    private DeclarationPeriod()
+    {
+    }
+
     public DeclarationPeriod(int year, int month)
     {
         if (year < 2000)
@@ -20,9 +24,9 @@ public sealed class DeclarationPeriod : ValueObject
         Month = month;
     }
 
-    public int Year { get; }
+    public int Year { get; private set; }
 
-    public int Month { get; }
+    public int Month { get; private set; }
 
     protected override IEnumerable<object?> GetEqualityComponents()
     {

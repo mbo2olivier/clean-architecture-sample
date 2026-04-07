@@ -1,5 +1,6 @@
-using System.Text.Json;
-using Cnss.Shared.Domain.Events;
+using Cnss.Cotisation.Domain.Aggregats;
+using Cnss.Cotisation.Domain.Entities;
+using Cnss.Cotisation.Domain.ValuesObject;
 using Microsoft.EntityFrameworkCore;
 
 namespace Cnss.Cotisation.Infrastructure.Persistence;
@@ -7,75 +8,66 @@ namespace Cnss.Cotisation.Infrastructure.Persistence;
 public sealed class CotisationDbContext : DbContext
 {
     public const string Schema = "cotisation";
-    private readonly List<CotisationOutboxMessageRecord> _pendingOutboxMessages = [];
 
     public CotisationDbContext(DbContextOptions<CotisationDbContext> options)
         : base(options)
     {
     }
 
-    public DbSet<CotisationDeclarationRecord> Declarations => Set<CotisationDeclarationRecord>();
+    public DbSet<Declaration> Declarations => Set<Declaration>();
 
-    public DbSet<CotisationDeclarationItemRecord> DeclarationItems => Set<CotisationDeclarationItemRecord>();
+    public DbSet<DeclarationItem> DeclarationItems => Set<DeclarationItem>();
 
     public DbSet<CotisationOutboxMessageRecord> OutboxMessages => Set<CotisationOutboxMessageRecord>();
-
-    public void EnqueueOutboxMessages(IEnumerable<IDomainEvent> domainEvents)
-    {
-        foreach (var domainEvent in domainEvents)
-        {
-            var eventType = domainEvent.GetType();
-
-            _pendingOutboxMessages.Add(new CotisationOutboxMessageRecord
-            {
-                Id = Guid.NewGuid(),
-                EventType = eventType.FullName ?? eventType.Name,
-                RoutingKey = BuildRoutingKey(eventType),
-                Payload = JsonSerializer.Serialize((object)domainEvent, eventType),
-                OccurredOnUtc = domainEvent.OccurredOn,
-                Status = OutboxMessageStatus.Pending
-            });
-        }
-    }
-
-    public override int SaveChanges()
-    {
-        PersistOutboxMessages();
-        return base.SaveChanges();
-    }
-
-    public override Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
-    {
-        PersistOutboxMessages();
-        return base.SaveChangesAsync(cancellationToken);
-    }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         modelBuilder.HasDefaultSchema(Schema);
 
-        modelBuilder.Entity<CotisationDeclarationRecord>(builder =>
+        modelBuilder.Entity<Declaration>(builder =>
         {
             builder.ToTable("cot_declarations");
 
-            builder.HasKey(x => x.Identifier);
+            builder.HasKey(x => x.Id);
 
-            builder.Property(x => x.Identifier)
+            builder.Ignore(x => x.Identifier);
+            builder.Ignore(x => x.DomainEvents);
+            builder.Ignore(x => x.TotalAmount);
+
+            builder.Property(x => x.Id)
                 .HasColumnName("cot_declaration_identifier")
                 .HasMaxLength(50);
 
-            builder.Property(x => x.EmployerIdentifier)
-                .HasColumnName("cot_declaration_employer_identifier")
-                .HasMaxLength(50)
-                .IsRequired();
+            builder.OwnsOne(x => x.EmployerIdentifier, employerIdentifierBuilder =>
+            {
+                employerIdentifierBuilder.WithOwner().HasForeignKey("DeclarationId");
+                employerIdentifierBuilder.Property(x => x.Value)
+                    .HasColumnName("cot_declaration_employer_identifier")
+                    .HasMaxLength(50)
+                    .IsRequired();
+                employerIdentifierBuilder.HasData(new
+                {
+                    DeclarationId = "DEC-0001",
+                    Value = "EMP-0001"
+                });
+            });
 
-            builder.Property(x => x.Year)
-                .HasColumnName("cot_declaration_year")
-                .IsRequired();
-
-            builder.Property(x => x.Month)
-                .HasColumnName("cot_declaration_month")
-                .IsRequired();
+            builder.OwnsOne(x => x.Period, periodBuilder =>
+            {
+                periodBuilder.WithOwner().HasForeignKey("DeclarationId");
+                periodBuilder.Property(x => x.Year)
+                    .HasColumnName("cot_declaration_year")
+                    .IsRequired();
+                periodBuilder.Property(x => x.Month)
+                    .HasColumnName("cot_declaration_month")
+                    .IsRequired();
+                periodBuilder.HasData(new
+                {
+                    DeclarationId = "DEC-0001",
+                    Year = 2026,
+                    Month = 3
+                });
+            });
 
             builder.Property(x => x.IsPublished)
                 .HasColumnName("cot_declaration_is_published")
@@ -86,16 +78,18 @@ public sealed class CotisationDbContext : DbContext
                 .HasForeignKey(x => x.DeclarationIdentifier)
                 .OnDelete(DeleteBehavior.Cascade);
 
-            builder.HasIndex(x => new { x.EmployerIdentifier, x.Year, x.Month });
+            builder.Navigation(x => x.Items)
+                .UsePropertyAccessMode(PropertyAccessMode.Field);
+
         });
 
-        modelBuilder.Entity<CotisationDeclarationItemRecord>(builder =>
+        modelBuilder.Entity<DeclarationItem>(builder =>
         {
             builder.ToTable("cot_declaration_items");
 
-            builder.HasKey(x => x.Identifier);
+            builder.HasKey(x => x.Id);
 
-            builder.Property(x => x.Identifier)
+            builder.Property(x => x.Id)
                 .HasColumnName("cot_declaration_item_identifier")
                 .HasMaxLength(50);
 
@@ -104,6 +98,8 @@ public sealed class CotisationDbContext : DbContext
                 .HasMaxLength(50)
                 .IsRequired();
 
+            builder.Ignore(x => x.Amount);
+
             builder.Property(x => x.EmployeeIdentifier)
                 .HasColumnName("cot_declaration_item_employee_identifier")
                 .HasMaxLength(50)
@@ -111,11 +107,6 @@ public sealed class CotisationDbContext : DbContext
 
             builder.Property(x => x.GrossSalary)
                 .HasColumnName("cot_declaration_item_gross_salary")
-                .HasPrecision(18, 2)
-                .IsRequired();
-
-            builder.Property(x => x.Amount)
-                .HasColumnName("cot_declaration_item_amount")
                 .HasPrecision(18, 2)
                 .IsRequired();
 
@@ -176,76 +167,27 @@ public sealed class CotisationDbContext : DbContext
             builder.HasIndex(x => x.LockedUntilUtc);
         });
 
-        modelBuilder.Entity<CotisationDeclarationRecord>().HasData(
-            new CotisationDeclarationRecord
+        modelBuilder.Entity<Declaration>().HasData(
+            new
             {
-                Identifier = "DEC-0001",
-                EmployerIdentifier = "EMP-0001",
-                Year = 2026,
-                Month = 3,
+                Id = "DEC-0001",
                 IsPublished = true
             });
 
-        modelBuilder.Entity<CotisationDeclarationItemRecord>().HasData(
-            new CotisationDeclarationItemRecord
+        modelBuilder.Entity<DeclarationItem>().HasData(
+            new
             {
-                Identifier = "DIT-0001",
+                Id = "DIT-0001",
                 DeclarationIdentifier = "DEC-0001",
                 EmployeeIdentifier = "SAL-0001",
-                GrossSalary = 1500m,
-                Amount = 75m
+                GrossSalary = 1500m
             },
-            new CotisationDeclarationItemRecord
+            new
             {
-                Identifier = "DIT-0002",
+                Id = "DIT-0002",
                 DeclarationIdentifier = "DEC-0001",
                 EmployeeIdentifier = "SAL-0002",
-                GrossSalary = 2000m,
-                Amount = 100m
+                GrossSalary = 2000m
             });
-    }
-
-    private void PersistOutboxMessages()
-    {
-        if (_pendingOutboxMessages.Count == 0)
-        {
-            return;
-        }
-
-        OutboxMessages.AddRange(_pendingOutboxMessages);
-        _pendingOutboxMessages.Clear();
-    }
-
-    private static string BuildRoutingKey(Type eventType)
-    {
-        var eventName = eventType.Name.EndsWith("Event", StringComparison.Ordinal)
-            ? eventType.Name[..^"Event".Length]
-            : eventType.Name;
-
-        return $"cotisation.{ToKebabCase(eventName)}";
-    }
-
-    private static string ToKebabCase(string value)
-    {
-        if (string.IsNullOrWhiteSpace(value))
-        {
-            return string.Empty;
-        }
-
-        var characters = new List<char>(value.Length + 8);
-
-        for (var index = 0; index < value.Length; index++)
-        {
-            var character = value[index];
-
-            if (char.IsUpper(character) && index > 0)
-            {
-                characters.Add('-');
-            }
-
-            characters.Add(char.ToLowerInvariant(character));
-        }
-
-        return new string(characters.ToArray());
     }
 }

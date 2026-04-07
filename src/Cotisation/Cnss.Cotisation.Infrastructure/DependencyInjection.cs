@@ -23,10 +23,13 @@ public static class DependencyInjection
             ?? "Host=localhost;Port=5432;Database=cnss;Username=cnss;Password=cnss";
         var rabbitMqOptions = configuration.GetSection("RabbitMq").Get<RabbitMqOptions>() ?? new RabbitMqOptions();
 
-        services.AddDbContext<CotisationDbContext>(options =>
+        services.AddScoped<CotisationOutboxSaveChangesInterceptor>();
+
+        services.AddDbContext<CotisationDbContext>((serviceProvider, options) =>
             options.UseNpgsql(
                 connectionString,
-                npgsql => npgsql.MigrationsHistoryTable("__EFMigrationsHistory", CotisationDbContext.Schema)));
+                npgsql => npgsql.MigrationsHistoryTable("__EFMigrationsHistory", CotisationDbContext.Schema))
+                .AddInterceptors(serviceProvider.GetRequiredService<CotisationOutboxSaveChangesInterceptor>()));
 
         services.AddSingleton(rabbitMqOptions);
         services.AddScoped<CotisationOutboxPublisher>();

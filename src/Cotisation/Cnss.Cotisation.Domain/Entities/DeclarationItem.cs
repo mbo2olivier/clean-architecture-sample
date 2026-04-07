@@ -4,6 +4,10 @@ namespace Cnss.Cotisation.Domain.Entities;
 
 public sealed class DeclarationItem : Entity<string>
 {
+    private DeclarationItem()
+    {
+    }
+
     public DeclarationItem(string id, string employeeIdentifier, decimal grossSalary)
         : base(id)
     {
@@ -21,9 +25,16 @@ public sealed class DeclarationItem : Entity<string>
         GrossSalary = grossSalary;
     }
 
-    public string EmployeeIdentifier { get; }
+    public string DeclarationIdentifier { get; private set; } = string.Empty;
 
-    public decimal GrossSalary { get; }
+    public string EmployeeIdentifier { get; private set; } = string.Empty;
+
+    public decimal GrossSalary { get; private set; }
 
     public decimal Amount => Math.Round(GrossSalary * 0.05m, 2, MidpointRounding.ToEven);
+
+    internal void AssignToDeclaration(string declarationIdentifier)
+    {
+        DeclarationIdentifier = declarationIdentifier;
+    }
 }

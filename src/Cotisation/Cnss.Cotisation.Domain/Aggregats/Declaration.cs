@@ -9,6 +9,10 @@ public sealed class Declaration : AggregateRoot<string>
 {
     private readonly List<DeclarationItem> _items = [];
 
+    private Declaration()
+    {
+    }
+
     internal Declaration(string identifier, EmployerIdentifier employerIdentifier, DeclarationPeriod period)
         : base(identifier)
     {
@@ -18,9 +22,9 @@ public sealed class Declaration : AggregateRoot<string>
 
     public string Identifier => Id;
 
-    public EmployerIdentifier EmployerIdentifier { get; }
+    public EmployerIdentifier EmployerIdentifier { get; private set; } = null!;
 
-    public DeclarationPeriod Period { get; }
+    public DeclarationPeriod Period { get; private set; } = null!;
 
     public IReadOnlyCollection<DeclarationItem> Items => _items.AsReadOnly();
 
@@ -35,6 +39,7 @@ public sealed class Declaration : AggregateRoot<string>
             throw new InvalidOperationException("Une déclaration publiée ne peut plus être modifiée.");
         }
 
+        item.AssignToDeclaration(Identifier);
         _items.Add(item);
     }
 
@@ -65,6 +70,7 @@ public sealed class Declaration : AggregateRoot<string>
 
         foreach (var item in items)
         {
+            item.AssignToDeclaration(identifier);
             declaration._items.Add(item);
         }
 

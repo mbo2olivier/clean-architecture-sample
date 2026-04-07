@@ -4,6 +4,10 @@ namespace Cnss.Cotisation.Domain.ValuesObject;
 
 public sealed class EmployerIdentifier : ValueObject
 {
+    private EmployerIdentifier()
+    {
+    }
+
     public EmployerIdentifier(string value)
     {
         if (string.IsNullOrWhiteSpace(value))
@@ -14,7 +18,7 @@ public sealed class EmployerIdentifier : ValueObject
         Value = value.Trim().ToUpperInvariant();
     }
 
-    public string Value { get; }
+    public string Value { get; private set; } = string.Empty;
 
     protected override IEnumerable<object?> GetEqualityComponents()
     {

@@ -4,6 +4,10 @@ namespace Cnss.Affiliation.Domain.Aggregats;
 
 public sealed class Employee : AggregateRoot<string>
 {
+    private Employee()
+    {
+    }
+
     private Employee(
         string identifier,
         string registrationNumber,
@@ -18,11 +22,11 @@ public sealed class Employee : AggregateRoot<string>
 
     public string Identifier => Id;
 
-    public string RegistrationNumber { get; }
+    public string RegistrationNumber { get; private set; } = string.Empty;
 
-    public string FirstName { get; }
+    public string FirstName { get; private set; } = string.Empty;
 
-    public string LastName { get; }
+    public string LastName { get; private set; } = string.Empty;
 
     public string? EmployerIdentifier { get; private set; }
 

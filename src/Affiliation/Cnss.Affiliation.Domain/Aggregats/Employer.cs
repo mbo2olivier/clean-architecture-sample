@@ -7,6 +7,10 @@ public sealed class Employer : AggregateRoot<string>
 {
     private readonly List<string> _employeeIdentifiers = [];
 
+    private Employer()
+    {
+    }
+
     private Employer(string identifier, string registrationNumber, string companyName)
         : base(identifier)
     {
@@ -16,7 +20,7 @@ public sealed class Employer : AggregateRoot<string>
 
     public string Identifier => Id;
 
-    public string RegistrationNumber { get; }
+    public string RegistrationNumber { get; private set; } = string.Empty;
 
     public string CompanyName { get; private set; }
 

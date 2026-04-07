@@ -1,5 +1,4 @@
-using System.Text.Json;
-using Cnss.Shared.Domain.Events;
+using Cnss.Affiliation.Domain.Aggregats;
 using Microsoft.EntityFrameworkCore;
 
 namespace Cnss.Affiliation.Infrastructure.Persistence;
@@ -7,60 +6,33 @@ namespace Cnss.Affiliation.Infrastructure.Persistence;
 public sealed class AffiliationDbContext : DbContext
 {
     public const string Schema = "affiliation";
-    private readonly List<AffiliationOutboxMessageRecord> _pendingOutboxMessages = [];
 
     public AffiliationDbContext(DbContextOptions<AffiliationDbContext> options)
         : base(options)
     {
     }
 
-    public DbSet<AffiliationEmployerRecord> Employers => Set<AffiliationEmployerRecord>();
+    public DbSet<Employer> Employers => Set<Employer>();
 
-    public DbSet<AffiliationEmployeeRecord> Employees => Set<AffiliationEmployeeRecord>();
+    public DbSet<Employee> Employees => Set<Employee>();
 
     public DbSet<AffiliationOutboxMessageRecord> OutboxMessages => Set<AffiliationOutboxMessageRecord>();
-
-    public void EnqueueOutboxMessages(IEnumerable<IDomainEvent> domainEvents)
-    {
-        foreach (var domainEvent in domainEvents)
-        {
-            var eventType = domainEvent.GetType();
-
-            _pendingOutboxMessages.Add(new AffiliationOutboxMessageRecord
-            {
-                Id = Guid.NewGuid(),
-                EventType = eventType.FullName ?? eventType.Name,
-                RoutingKey = BuildRoutingKey(eventType),
-                Payload = JsonSerializer.Serialize((object)domainEvent, eventType),
-                OccurredOnUtc = domainEvent.OccurredOn,
-                Status = OutboxMessageStatus.Pending
-            });
-        }
-    }
-
-    public override int SaveChanges()
-    {
-        PersistOutboxMessages();
-        return base.SaveChanges();
-    }
-
-    public override Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
-    {
-        PersistOutboxMessages();
-        return base.SaveChangesAsync(cancellationToken);
-    }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         modelBuilder.HasDefaultSchema(Schema);
 
-        modelBuilder.Entity<AffiliationEmployerRecord>(builder =>
+        modelBuilder.Entity<Employer>(builder =>
         {
             builder.ToTable("aff_employers");
 
-            builder.HasKey(x => x.Identifier);
+            builder.HasKey(x => x.Id);
 
-            builder.Property(x => x.Identifier)
+            builder.Ignore(x => x.Identifier);
+            builder.Ignore(x => x.EmployeeIdentifiers);
+            builder.Ignore(x => x.DomainEvents);
+
+            builder.Property(x => x.Id)
                 .HasColumnName("aff_employer_identifier")
                 .HasMaxLength(50);
 
@@ -74,22 +46,20 @@ public sealed class AffiliationDbContext : DbContext
                 .HasMaxLength(200)
                 .IsRequired();
 
-            builder.Property(x => x.EmployeeIdentifiers)
-                .HasColumnName("aff_employer_employee_identifiers")
-                .HasColumnType("text[]")
-                .IsRequired();
-
             builder.HasIndex(x => x.RegistrationNumber)
                 .IsUnique();
         });
 
-        modelBuilder.Entity<AffiliationEmployeeRecord>(builder =>
+        modelBuilder.Entity<Employee>(builder =>
         {
             builder.ToTable("aff_employees");
 
-            builder.HasKey(x => x.Identifier);
+            builder.HasKey(x => x.Id);
 
-            builder.Property(x => x.Identifier)
+            builder.Ignore(x => x.Identifier);
+            builder.Ignore(x => x.DomainEvents);
+
+            builder.Property(x => x.Id)
                 .HasColumnName("aff_employee_identifier")
                 .HasMaxLength(50);
 
@@ -172,75 +142,30 @@ public sealed class AffiliationDbContext : DbContext
             builder.HasIndex(x => x.LockedUntilUtc);
         });
 
-        modelBuilder.Entity<AffiliationEmployerRecord>().HasData(
-            new AffiliationEmployerRecord
+        modelBuilder.Entity<Employer>().HasData(
+            new
             {
-                Identifier = "EMP-0001",
+                Id = "EMP-0001",
                 RegistrationNumber = "RCCM-001",
-                CompanyName = "ACME SARL",
-                EmployeeIdentifiers = ["SAL-0001", "SAL-0002"]
+                CompanyName = "ACME SARL"
             });
 
-        modelBuilder.Entity<AffiliationEmployeeRecord>().HasData(
-            new AffiliationEmployeeRecord
+        modelBuilder.Entity<Employee>().HasData(
+            new
             {
-                Identifier = "SAL-0001",
+                Id = "SAL-0001",
                 RegistrationNumber = "MAT-001",
                 FirstName = "John",
                 LastName = "Doe",
                 EmployerIdentifier = "EMP-0001"
             },
-            new AffiliationEmployeeRecord
+            new
             {
-                Identifier = "SAL-0002",
+                Id = "SAL-0002",
                 RegistrationNumber = "MAT-002",
                 FirstName = "Jane",
                 LastName = "Doe",
                 EmployerIdentifier = "EMP-0001"
             });
-    }
-
-    private void PersistOutboxMessages()
-    {
-        if (_pendingOutboxMessages.Count == 0)
-        {
-            return;
-        }
-
-        OutboxMessages.AddRange(_pendingOutboxMessages);
-        _pendingOutboxMessages.Clear();
-    }
-
-    private static string BuildRoutingKey(Type eventType)
-    {
-        var eventName = eventType.Name.EndsWith("Event", StringComparison.Ordinal)
-            ? eventType.Name[..^"Event".Length]
-            : eventType.Name;
-
-        return $"affiliation.{ToKebabCase(eventName)}";
-    }
-
-    private static string ToKebabCase(string value)
-    {
-        if (string.IsNullOrWhiteSpace(value))
-        {
-            return string.Empty;
-        }
-
-        var characters = new List<char>(value.Length + 8);
-
-        for (var index = 0; index < value.Length; index++)
-        {
-            var character = value[index];
-
-            if (char.IsUpper(character) && index > 0)
-            {
-                characters.Add('-');
-            }
-
-            characters.Add(char.ToLowerInvariant(character));
-        }
-
-        return new string(characters.ToArray());
     }
 }

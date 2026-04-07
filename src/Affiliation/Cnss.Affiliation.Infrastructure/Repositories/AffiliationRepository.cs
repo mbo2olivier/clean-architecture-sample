@@ -16,17 +16,15 @@ public sealed class AffiliationRepository : IAffiliationRepository
 
     public async Task AddEmployerAsync(Employer employer, CancellationToken cancellationToken = default)
     {
-        await _dbContext.Employers.AddAsync(MapEmployer(employer), cancellationToken);
-        _dbContext.EnqueueOutboxMessages(employer.DomainEvents);
+        await _dbContext.Employers.AddAsync(employer, cancellationToken);
         await _dbContext.SaveChangesAsync(cancellationToken);
-        employer.ClearDomainEvents();
     }
 
     public async Task<Employer?> GetEmployerAsync(string employerIdentifier, CancellationToken cancellationToken = default)
     {
         var employerRecord = await _dbContext.Employers
             .AsNoTracking()
-            .SingleOrDefaultAsync(x => x.Identifier == employerIdentifier, cancellationToken);
+            .SingleOrDefaultAsync(x => x.Id == employerIdentifier, cancellationToken);
 
         if (employerRecord is null)
         {
@@ -38,77 +36,29 @@ public sealed class AffiliationRepository : IAffiliationRepository
             .Where(x => x.EmployerIdentifier == employerIdentifier)
             .ToListAsync(cancellationToken);
 
-        var employees = employeeRecords
-            .Select(MapEmployee)
-            .ToArray();
+        var employees = employeeRecords.ToArray();
 
-        return Employer.Restore(
-            employerRecord.Identifier,
-            employerRecord.RegistrationNumber,
-            employerRecord.CompanyName,
-            employees);
+        return Employer.Restore(employerRecord.Identifier, employerRecord.RegistrationNumber, employerRecord.CompanyName, employees);
     }
 
     public async Task UpdateEmployerAsync(Employer employer, CancellationToken cancellationToken = default)
     {
-        var employerRecord = await _dbContext.Employers
-            .SingleAsync(x => x.Identifier == employer.Identifier, cancellationToken);
-
-        employerRecord.RegistrationNumber = employer.RegistrationNumber;
-        employerRecord.CompanyName = employer.CompanyName;
-        employerRecord.EmployeeIdentifiers = employer.EmployeeIdentifiers.ToArray();
-
-        _dbContext.EnqueueOutboxMessages(employer.DomainEvents);
+        _dbContext.Employers.Update(employer);
         await _dbContext.SaveChangesAsync(cancellationToken);
-        employer.ClearDomainEvents();
     }
 
     public async Task AddEmployeeAsync(Employee employee, CancellationToken cancellationToken = default)
     {
-        await _dbContext.Employees.AddAsync(MapEmployee(employee), cancellationToken);
+        await _dbContext.Employees.AddAsync(employee, cancellationToken);
         await _dbContext.SaveChangesAsync(cancellationToken);
-        employee.ClearDomainEvents();
     }
 
     public async Task<Employee?> GetEmployeeAsync(string employeeIdentifier, CancellationToken cancellationToken = default)
     {
         var employeeRecord = await _dbContext.Employees
             .AsNoTracking()
-            .SingleOrDefaultAsync(x => x.Identifier == employeeIdentifier, cancellationToken);
+            .SingleOrDefaultAsync(x => x.Id == employeeIdentifier, cancellationToken);
 
-        return employeeRecord is null ? null : MapEmployee(employeeRecord);
-    }
-
-    private static AffiliationEmployerRecord MapEmployer(Employer employer)
-    {
-        return new AffiliationEmployerRecord
-        {
-            Identifier = employer.Identifier,
-            RegistrationNumber = employer.RegistrationNumber,
-            CompanyName = employer.CompanyName,
-            EmployeeIdentifiers = employer.EmployeeIdentifiers.ToArray()
-        };
-    }
-
-    private static AffiliationEmployeeRecord MapEmployee(Employee employee)
-    {
-        return new AffiliationEmployeeRecord
-        {
-            Identifier = employee.Identifier,
-            RegistrationNumber = employee.RegistrationNumber,
-            FirstName = employee.FirstName,
-            LastName = employee.LastName,
-            EmployerIdentifier = employee.EmployerIdentifier
-        };
-    }
-
-    private static Employee MapEmployee(AffiliationEmployeeRecord employeeRecord)
-    {
-        return Employee.Restore(
-            employeeRecord.Identifier,
-            employeeRecord.RegistrationNumber,
-            employeeRecord.FirstName,
-            employeeRecord.LastName,
-            employeeRecord.EmployerIdentifier);
+        return employeeRecord;
     }
 }

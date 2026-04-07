@@ -1,9 +1,9 @@
 using Cnss.Cotisation.Application;
-using Cnss.Cotisation.Infrastructure.Configuration;
 using Cnss.Cotisation.Infrastructure.Messaging;
 using Cnss.Cotisation.Domain.Repositories;
 using Cnss.Cotisation.Infrastructure.Persistence;
 using Cnss.Cotisation.Infrastructure.Repositories;
+using Cnss.Shared.Infrastructure.Configuration;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;

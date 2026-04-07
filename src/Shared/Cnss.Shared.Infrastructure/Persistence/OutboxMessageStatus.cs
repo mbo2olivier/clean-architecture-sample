@@ -1,4 +1,4 @@
-namespace Cnss.Cotisation.Infrastructure.Persistence;
+namespace Cnss.Shared.Infrastructure.Persistence;
 
 public static class OutboxMessageStatus
 {

@@ -37,6 +37,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Cnss.Affiliation.Portal", "
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Cnss.Cotisation.Api", "src\Cotisation\Cnss.Cotisation.Api\Cnss.Cotisation.Api.csproj", "{70CEC25A-E94C-43F3-B963-0F879BAA168C}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Cnss.Shared.Infrastructure", "src\Shared\Cnss.Shared.Infrastructure\Cnss.Shared.Infrastructure.csproj", "{2982AD34-EB03-409D-95F6-5D5558EA1994}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -191,6 +193,18 @@ Global
 		{70CEC25A-E94C-43F3-B963-0F879BAA168C}.Release|x64.Build.0 = Release|Any CPU
 		{70CEC25A-E94C-43F3-B963-0F879BAA168C}.Release|x86.ActiveCfg = Release|Any CPU
 		{70CEC25A-E94C-43F3-B963-0F879BAA168C}.Release|x86.Build.0 = Release|Any CPU
+		{2982AD34-EB03-409D-95F6-5D5558EA1994}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{2982AD34-EB03-409D-95F6-5D5558EA1994}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{2982AD34-EB03-409D-95F6-5D5558EA1994}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{2982AD34-EB03-409D-95F6-5D5558EA1994}.Debug|x64.Build.0 = Debug|Any CPU
+		{2982AD34-EB03-409D-95F6-5D5558EA1994}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{2982AD34-EB03-409D-95F6-5D5558EA1994}.Debug|x86.Build.0 = Debug|Any CPU
+		{2982AD34-EB03-409D-95F6-5D5558EA1994}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{2982AD34-EB03-409D-95F6-5D5558EA1994}.Release|Any CPU.Build.0 = Release|Any CPU
+		{2982AD34-EB03-409D-95F6-5D5558EA1994}.Release|x64.ActiveCfg = Release|Any CPU
+		{2982AD34-EB03-409D-95F6-5D5558EA1994}.Release|x64.Build.0 = Release|Any CPU
+		{2982AD34-EB03-409D-95F6-5D5558EA1994}.Release|x86.ActiveCfg = Release|Any CPU
+		{2982AD34-EB03-409D-95F6-5D5558EA1994}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -211,5 +225,6 @@ Global
 		{F93E0714-B7AF-4771-AA18-AA6E1E92A66F} = {EC9B609C-0C4E-F68B-2ADB-CFF310C2CAAE}
 		{42D805C9-1F7E-4132-B47E-6BB7E2756EAF} = {A7A28B19-0D20-1C87-1ED0-5A9ED02B6382}
 		{70CEC25A-E94C-43F3-B963-0F879BAA168C} = {EC9B609C-0C4E-F68B-2ADB-CFF310C2CAAE}
+		{2982AD34-EB03-409D-95F6-5D5558EA1994} = {C8E42992-5E42-0C2B-DBFE-AA848D06431C}
 	EndGlobalSection
 EndGlobal

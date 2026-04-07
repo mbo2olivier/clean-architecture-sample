@@ -1,9 +1,9 @@
 using Cnss.Affiliation.Application;
-using Cnss.Affiliation.Infrastructure.Configuration;
 using Cnss.Affiliation.Infrastructure.Messaging;
 using Cnss.Affiliation.Domain.Repositories;
 using Cnss.Affiliation.Infrastructure.Persistence;
 using Cnss.Affiliation.Infrastructure.Repositories;
+using Cnss.Shared.Infrastructure.Configuration;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;

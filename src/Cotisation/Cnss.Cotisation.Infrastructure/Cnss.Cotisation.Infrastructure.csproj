@@ -5,6 +5,7 @@
     <ProjectReference Include="..\Cnss.Cotisation.Application\Cnss.Cotisation.Application.csproj" />
     <ProjectReference Include="..\..\Shared\Cnss.Shared.Domain\Cnss.Shared.Domain.csproj" />
     <ProjectReference Include="..\..\Shared\Cnss.Shared.Application\Cnss.Shared.Application.csproj" />
+    <ProjectReference Include="..\..\Shared\Cnss.Shared.Infrastructure\Cnss.Shared.Infrastructure.csproj" />
     <FrameworkReference Include="Microsoft.AspNetCore.App" />
   </ItemGroup>
 

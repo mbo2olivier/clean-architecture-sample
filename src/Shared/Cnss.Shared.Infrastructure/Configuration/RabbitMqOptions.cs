@@ -1,4 +1,4 @@
-namespace Cnss.Cotisation.Infrastructure.Configuration;
+namespace Cnss.Shared.Infrastructure.Configuration;
 
 public sealed class RabbitMqOptions
 {

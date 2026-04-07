@@ -1,3 +1,5 @@
+using System.Text.Json;
+using Cnss.Shared.Domain.Events;
 using Microsoft.EntityFrameworkCore;
 
 namespace Cnss.Cotisation.Infrastructure.Persistence;
@@ -5,6 +7,7 @@ namespace Cnss.Cotisation.Infrastructure.Persistence;
 public sealed class CotisationDbContext : DbContext
 {
     public const string Schema = "cotisation";
+    private readonly List<CotisationOutboxMessageRecord> _pendingOutboxMessages = [];
 
     public CotisationDbContext(DbContextOptions<CotisationDbContext> options)
         : base(options)
@@ -14,6 +17,38 @@ public sealed class CotisationDbContext : DbContext
     public DbSet<CotisationDeclarationRecord> Declarations => Set<CotisationDeclarationRecord>();
 
     public DbSet<CotisationDeclarationItemRecord> DeclarationItems => Set<CotisationDeclarationItemRecord>();
+
+    public DbSet<CotisationOutboxMessageRecord> OutboxMessages => Set<CotisationOutboxMessageRecord>();
+
+    public void EnqueueOutboxMessages(IEnumerable<IDomainEvent> domainEvents)
+    {
+        foreach (var domainEvent in domainEvents)
+        {
+            var eventType = domainEvent.GetType();
+
+            _pendingOutboxMessages.Add(new CotisationOutboxMessageRecord
+            {
+                Id = Guid.NewGuid(),
+                EventType = eventType.FullName ?? eventType.Name,
+                RoutingKey = BuildRoutingKey(eventType),
+                Payload = JsonSerializer.Serialize((object)domainEvent, eventType),
+                OccurredOnUtc = domainEvent.OccurredOn,
+                Status = OutboxMessageStatus.Pending
+            });
+        }
+    }
+
+    public override int SaveChanges()
+    {
+        PersistOutboxMessages();
+        return base.SaveChanges();
+    }
+
+    public override Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
+    {
+        PersistOutboxMessages();
+        return base.SaveChangesAsync(cancellationToken);
+    }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -87,6 +122,60 @@ public sealed class CotisationDbContext : DbContext
             builder.HasIndex(x => x.DeclarationIdentifier);
         });
 
+        modelBuilder.Entity<CotisationOutboxMessageRecord>(builder =>
+        {
+            builder.ToTable("cot_outbox_messages");
+
+            builder.HasKey(x => x.Id);
+
+            builder.Property(x => x.Id)
+                .HasColumnName("cot_outbox_message_id");
+
+            builder.Property(x => x.EventType)
+                .HasColumnName("cot_outbox_event_type")
+                .HasMaxLength(500)
+                .IsRequired();
+
+            builder.Property(x => x.RoutingKey)
+                .HasColumnName("cot_outbox_routing_key")
+                .HasMaxLength(200)
+                .IsRequired();
+
+            builder.Property(x => x.Payload)
+                .HasColumnName("cot_outbox_payload")
+                .HasColumnType("jsonb")
+                .IsRequired();
+
+            builder.Property(x => x.OccurredOnUtc)
+                .HasColumnName("cot_outbox_occurred_on_utc")
+                .IsRequired();
+
+            builder.Property(x => x.Status)
+                .HasColumnName("cot_outbox_status")
+                .HasMaxLength(50)
+                .IsRequired();
+
+            builder.Property(x => x.AttemptCount)
+                .HasColumnName("cot_outbox_attempt_count")
+                .IsRequired();
+
+            builder.Property(x => x.ProcessingStartedOnUtc)
+                .HasColumnName("cot_outbox_processing_started_on_utc");
+
+            builder.Property(x => x.LockedUntilUtc)
+                .HasColumnName("cot_outbox_locked_until_utc");
+
+            builder.Property(x => x.ProcessedOnUtc)
+                .HasColumnName("cot_outbox_processed_on_utc");
+
+            builder.Property(x => x.LastError)
+                .HasColumnName("cot_outbox_last_error")
+                .HasMaxLength(4000);
+
+            builder.HasIndex(x => new { x.Status, x.OccurredOnUtc });
+            builder.HasIndex(x => x.LockedUntilUtc);
+        });
+
         modelBuilder.Entity<CotisationDeclarationRecord>().HasData(
             new CotisationDeclarationRecord
             {
@@ -114,5 +203,49 @@ public sealed class CotisationDbContext : DbContext
                 GrossSalary = 2000m,
                 Amount = 100m
             });
+    }
+
+    private void PersistOutboxMessages()
+    {
+        if (_pendingOutboxMessages.Count == 0)
+        {
+            return;
+        }
+
+        OutboxMessages.AddRange(_pendingOutboxMessages);
+        _pendingOutboxMessages.Clear();
+    }
+
+    private static string BuildRoutingKey(Type eventType)
+    {
+        var eventName = eventType.Name.EndsWith("Event", StringComparison.Ordinal)
+            ? eventType.Name[..^"Event".Length]
+            : eventType.Name;
+
+        return $"cotisation.{ToKebabCase(eventName)}";
+    }
+
+    private static string ToKebabCase(string value)
+    {
+        if (string.IsNullOrWhiteSpace(value))
+        {
+            return string.Empty;
+        }
+
+        var characters = new List<char>(value.Length + 8);
+
+        for (var index = 0; index < value.Length; index++)
+        {
+            var character = value[index];
+
+            if (char.IsUpper(character) && index > 0)
+            {
+                characters.Add('-');
+            }
+
+            characters.Add(char.ToLowerInvariant(character));
+        }
+
+        return new string(characters.ToArray());
     }
 }

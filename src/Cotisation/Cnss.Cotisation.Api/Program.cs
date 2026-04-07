@@ -5,11 +5,9 @@ var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddControllers();
 builder.Services.AddOpenApi();
-var connectionString = builder.Configuration.GetConnectionString("Database")
-    ?? "Host=localhost;Port=5432;Database=cnss;Username=cnss;Password=cnss";
 
-builder.Services.AddAffiliationInfrastructureLayer(connectionString);
-builder.Services.AddCotisationInfrastructureLayer(connectionString);
+builder.Services.AddAffiliationInfrastructureLayer(builder.Configuration, enableOutboxProcessor: false);
+builder.Services.AddCotisationInfrastructureLayer(builder.Configuration);
 
 var app = builder.Build();
 

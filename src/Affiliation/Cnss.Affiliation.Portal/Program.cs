@@ -3,9 +3,7 @@ using Cnss.Affiliation.Infrastructure;
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddRazorPages();
-builder.Services.AddAffiliationInfrastructureLayer(
-    builder.Configuration.GetConnectionString("Database")
-    ?? "Host=localhost;Port=5432;Database=cnss;Username=cnss;Password=cnss");
+builder.Services.AddAffiliationInfrastructureLayer(builder.Configuration);
 
 var app = builder.Build();
 

@@ -1,8 +1,11 @@
 using Cnss.Cotisation.Application;
+using Cnss.Cotisation.Infrastructure.Configuration;
+using Cnss.Cotisation.Infrastructure.Messaging;
 using Cnss.Cotisation.Domain.Repositories;
 using Cnss.Cotisation.Infrastructure.Persistence;
 using Cnss.Cotisation.Infrastructure.Repositories;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace Cnss.Cotisation.Infrastructure;
@@ -11,16 +14,28 @@ public static class DependencyInjection
 {
     public static IServiceCollection AddCotisationInfrastructureLayer(
         this IServiceCollection services,
-        string connectionString)
+        IConfiguration configuration,
+        bool enableOutboxProcessor = true)
     {
         services.AddCotisationApplicationLayer();
+
+        var connectionString = configuration.GetConnectionString("Database")
+            ?? "Host=localhost;Port=5432;Database=cnss;Username=cnss;Password=cnss";
+        var rabbitMqOptions = configuration.GetSection("RabbitMq").Get<RabbitMqOptions>() ?? new RabbitMqOptions();
 
         services.AddDbContext<CotisationDbContext>(options =>
             options.UseNpgsql(
                 connectionString,
                 npgsql => npgsql.MigrationsHistoryTable("__EFMigrationsHistory", CotisationDbContext.Schema)));
 
+        services.AddSingleton(rabbitMqOptions);
+        services.AddScoped<CotisationOutboxPublisher>();
         services.AddScoped<IDeclarationRepository, DeclarationRepository>();
+
+        if (enableOutboxProcessor)
+        {
+            services.AddHostedService<CotisationOutboxProcessor>();
+        }
 
         return services;
     }

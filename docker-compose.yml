@@ -11,5 +11,18 @@ services:
     volumes:
       - cnss-postgres-data:/var/lib/postgresql/data
 
+  rabbitmq:
+    image: rabbitmq:3-management-alpine
+    container_name: cnss-rabbitmq
+    environment:
+      RABBITMQ_DEFAULT_USER: cnss
+      RABBITMQ_DEFAULT_PASS: cnss
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    volumes:
+      - cnss-rabbitmq-data:/var/lib/rabbitmq
+
 volumes:
   cnss-postgres-data:
+  cnss-rabbitmq-data:

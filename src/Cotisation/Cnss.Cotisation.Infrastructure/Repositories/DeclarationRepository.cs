@@ -19,7 +19,9 @@ public sealed class DeclarationRepository : IDeclarationRepository
     public async Task AddAsync(Declaration declaration, CancellationToken cancellationToken = default)
     {
         await _dbContext.Declarations.AddAsync(MapDeclaration(declaration), cancellationToken);
+        _dbContext.EnqueueOutboxMessages(declaration.DomainEvents);
         await _dbContext.SaveChangesAsync(cancellationToken);
+        declaration.ClearDomainEvents();
     }
 
     public async Task<Declaration?> GetAsync(string declarationIdentifier, CancellationToken cancellationToken = default)

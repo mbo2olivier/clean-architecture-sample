@@ -17,7 +17,9 @@ public sealed class AffiliationRepository : IAffiliationRepository
     public async Task AddEmployerAsync(Employer employer, CancellationToken cancellationToken = default)
     {
         await _dbContext.Employers.AddAsync(MapEmployer(employer), cancellationToken);
+        _dbContext.EnqueueOutboxMessages(employer.DomainEvents);
         await _dbContext.SaveChangesAsync(cancellationToken);
+        employer.ClearDomainEvents();
     }
 
     public async Task<Employer?> GetEmployerAsync(string employerIdentifier, CancellationToken cancellationToken = default)
@@ -56,13 +58,16 @@ public sealed class AffiliationRepository : IAffiliationRepository
         employerRecord.CompanyName = employer.CompanyName;
         employerRecord.EmployeeIdentifiers = employer.EmployeeIdentifiers.ToArray();
 
+        _dbContext.EnqueueOutboxMessages(employer.DomainEvents);
         await _dbContext.SaveChangesAsync(cancellationToken);
+        employer.ClearDomainEvents();
     }
 
     public async Task AddEmployeeAsync(Employee employee, CancellationToken cancellationToken = default)
     {
         await _dbContext.Employees.AddAsync(MapEmployee(employee), cancellationToken);
         await _dbContext.SaveChangesAsync(cancellationToken);
+        employee.ClearDomainEvents();
     }
 
     public async Task<Employee?> GetEmployeeAsync(string employeeIdentifier, CancellationToken cancellationToken = default)

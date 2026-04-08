@@ -2,7 +2,6 @@
 
   <ItemGroup>
     <ProjectReference Include="..\Cnss.Shared.Domain\Cnss.Shared.Domain.csproj" />
-    <ProjectReference Include="..\..\Affiliation\Cnss.Affiliation.Domain\Cnss.Affiliation.Domain.csproj" />
   </ItemGroup>
 
   <ItemGroup>

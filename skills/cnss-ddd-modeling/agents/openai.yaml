@@ -1,0 +1,7 @@
+interface:
+  display_name: "CNSS DDD Modeling"
+  short_description: "CNSS DDD and Clean Architecture modeling"
+  icon_small: "./assets/cnss-ddd-modeling-small.svg"
+  icon_large: "./assets/cnss-ddd-modeling.svg"
+  brand_color: "#0F766E"
+  default_prompt: "Use $cnss-ddd-modeling to generate or update a CNSS module model from procedures, legal texts, and the current validated model."

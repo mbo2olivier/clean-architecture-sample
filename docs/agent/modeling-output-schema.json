@@ -1,0 +1,343 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://cnss.local/schemas/modeling-output-schema.json",
+  "title": "CNSS DDD Clean Modeling Output",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "module_name",
+    "module_purpose",
+    "bounded_context",
+    "actors",
+    "ubiquitous_language",
+    "use_cases",
+    "entities",
+    "value_objects",
+    "aggregates",
+    "domain_services",
+    "repositories",
+    "domain_events",
+    "business_rules",
+    "external_dependencies",
+    "assumptions",
+    "open_questions",
+    "conflicts_with_existing_model",
+    "suggested_clean_architecture_structure",
+    "mermaid_diagrams"
+  ],
+  "properties": {
+    "module_name": {
+      "type": "string",
+      "minLength": 1
+    },
+    "module_purpose": {
+      "type": "string",
+      "minLength": 1
+    },
+    "bounded_context": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "name",
+        "scope",
+        "upstream_dependencies",
+        "downstream_dependencies"
+      ],
+      "properties": {
+        "name": { "type": "string" },
+        "scope": { "type": "string" },
+        "upstream_dependencies": {
+          "type": "array",
+          "items": { "type": "string" }
+        },
+        "downstream_dependencies": {
+          "type": "array",
+          "items": { "type": "string" }
+        }
+      }
+    },
+    "actors": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/namedDescription"
+      }
+    },
+    "ubiquitous_language": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["term", "definition"],
+        "properties": {
+          "term": { "type": "string" },
+          "definition": { "type": "string" },
+          "aliases": {
+            "type": "array",
+            "items": { "type": "string" }
+          },
+          "source_refs": {
+            "type": "array",
+            "items": { "type": "string" }
+          }
+        }
+      }
+    },
+    "use_cases": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "name",
+          "purpose",
+          "type",
+          "actors",
+          "inputs",
+          "outputs",
+          "steps",
+          "business_rules_refs"
+        ],
+        "properties": {
+          "name": { "type": "string" },
+          "purpose": { "type": "string" },
+          "type": { "type": "string", "enum": ["command", "query", "mixed", "unknown"] },
+          "actors": {
+            "type": "array",
+            "items": { "type": "string" }
+          },
+          "inputs": {
+            "type": "array",
+            "items": { "$ref": "#/$defs/fieldSpec" }
+          },
+          "outputs": {
+            "type": "array",
+            "items": { "$ref": "#/$defs/fieldSpec" }
+          },
+          "steps": {
+            "type": "array",
+            "items": { "type": "string" }
+          },
+          "business_rules_refs": {
+            "type": "array",
+            "items": { "type": "string" }
+          },
+          "existing_task_mapping": {
+            "type": "array",
+            "items": { "type": "string" }
+          }
+        }
+      }
+    },
+    "entities": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/modelElement" }
+    },
+    "value_objects": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/modelElement" }
+    },
+    "aggregates": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "name",
+          "root_entity",
+          "purpose",
+          "invariants",
+          "contained_entities",
+          "value_objects",
+          "domain_events"
+        ],
+        "properties": {
+          "name": { "type": "string" },
+          "root_entity": { "type": "string" },
+          "purpose": { "type": "string" },
+          "invariants": {
+            "type": "array",
+            "items": { "type": "string" }
+          },
+          "contained_entities": {
+            "type": "array",
+            "items": { "type": "string" }
+          },
+          "value_objects": {
+            "type": "array",
+            "items": { "type": "string" }
+          },
+          "domain_events": {
+            "type": "array",
+            "items": { "type": "string" }
+          },
+          "restore_strategy": { "type": "string" }
+        }
+      }
+    },
+    "domain_services": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/namedDescription" }
+    },
+    "repositories": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["name", "aggregate", "operations"],
+        "properties": {
+          "name": { "type": "string" },
+          "aggregate": { "type": "string" },
+          "operations": {
+            "type": "array",
+            "items": { "type": "string" }
+          },
+          "notes": { "type": "string" }
+        }
+      }
+    },
+    "domain_events": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["name", "trigger", "payload", "business_meaning"],
+        "properties": {
+          "name": { "type": "string" },
+          "trigger": { "type": "string" },
+          "payload": {
+            "type": "array",
+            "items": { "$ref": "#/$defs/fieldSpec" }
+          },
+          "business_meaning": { "type": "string" },
+          "integration_notes": { "type": "string" }
+        }
+      }
+    },
+    "business_rules": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["id", "rule", "source", "confidence"],
+        "properties": {
+          "id": { "type": "string" },
+          "rule": { "type": "string" },
+          "source": { "type": "string" },
+          "confidence": { "type": "string", "enum": ["observed", "derived", "hypothesis"] },
+          "impact": { "type": "string" }
+        }
+      }
+    },
+    "external_dependencies": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/namedDescription" }
+    },
+    "assumptions": {
+      "type": "array",
+      "items": { "type": "string" }
+    },
+    "open_questions": {
+      "type": "array",
+      "items": { "type": "string" }
+    },
+    "conflicts_with_existing_model": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["type", "description", "severity"],
+        "properties": {
+          "type": { "type": "string" },
+          "description": { "type": "string" },
+          "severity": { "type": "string", "enum": ["low", "medium", "high"] },
+          "existing_reference": { "type": "string" },
+          "suggested_resolution": { "type": "string" }
+        }
+      }
+    },
+    "suggested_clean_architecture_structure": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["domain", "application", "infrastructure", "entrypoints"],
+      "properties": {
+        "domain": {
+          "type": "array",
+          "items": { "type": "string" }
+        },
+        "application": {
+          "type": "array",
+          "items": { "type": "string" }
+        },
+        "infrastructure": {
+          "type": "array",
+          "items": { "type": "string" }
+        },
+        "entrypoints": {
+          "type": "array",
+          "items": { "type": "string" }
+        }
+      }
+    },
+    "mermaid_diagrams": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["name", "diagram_type", "content"],
+        "properties": {
+          "name": { "type": "string" },
+          "diagram_type": {
+            "type": "string",
+            "enum": ["flowchart", "sequenceDiagram", "classDiagram", "stateDiagram-v2", "erDiagram", "journey", "unknown"]
+          },
+          "content": { "type": "string" },
+          "purpose": { "type": "string" }
+        }
+      }
+    }
+  },
+  "$defs": {
+    "namedDescription": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["name", "description"],
+      "properties": {
+        "name": { "type": "string" },
+        "description": { "type": "string" },
+        "source_refs": {
+          "type": "array",
+          "items": { "type": "string" }
+        }
+      }
+    },
+    "fieldSpec": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["name", "type", "description"],
+      "properties": {
+        "name": { "type": "string" },
+        "type": { "type": "string" },
+        "description": { "type": "string" },
+        "required": { "type": "boolean" }
+      }
+    },
+    "modelElement": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["name", "description"],
+      "properties": {
+        "name": { "type": "string" },
+        "description": { "type": "string" },
+        "attributes": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/fieldSpec" }
+        },
+        "invariants": {
+          "type": "array",
+          "items": { "type": "string" }
+        }
+      }
+    }
+  }
+}
+

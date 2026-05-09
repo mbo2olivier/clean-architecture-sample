@@ -1,0 +1,73 @@
+@page
+@model Cnss.Affiliation.Portal.Pages.EmployerDetailsModel
+@{
+    ViewData["Title"] = "Détails employeur";
+}
+
+<div class="container py-4">
+    <h1 class="h2 mb-4">Détails d'un employeur</h1>
+
+    @if (!string.IsNullOrWhiteSpace(Model.ErrorMessage))
+    {
+        <div class="alert alert-danger">@Model.ErrorMessage</div>
+    }
+
+    <form method="get" class="card shadow-sm mb-4">
+        <div class="card-body">
+            <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+
+            <div class="row g-3 align-items-end">
+                <div class="col-md-8">
+                    <label asp-for="Input.EmployerIdentifier" class="form-label"></label>
+                    <input asp-for="Input.EmployerIdentifier" class="form-control" />
+                    <span asp-validation-for="Input.EmployerIdentifier" class="text-danger"></span>
+                </div>
+                <div class="col-md-4">
+                    <button type="submit" class="btn btn-primary">Rechercher</button>
+                    <a asp-page="/Index" class="btn btn-link">Retour</a>
+                </div>
+            </div>
+        </div>
+    </form>
+
+    @if (Model.Employer is not null)
+    {
+        <section class="card shadow-sm">
+            <div class="card-body">
+                <h2 class="h4 mb-3">@Model.Employer.CompanyName</h2>
+
+                <dl class="row mb-0">
+                    <dt class="col-sm-4">Identifiant employeur</dt>
+                    <dd class="col-sm-8">@Model.Employer.EmployerIdentifier</dd>
+
+                    <dt class="col-sm-4">Numéro d'immatriculation</dt>
+                    <dd class="col-sm-8">@Model.Employer.RegistrationNumber</dd>
+
+                    <dt class="col-sm-4">Raison sociale</dt>
+                    <dd class="col-sm-8">@Model.Employer.CompanyName</dd>
+
+                    <dt class="col-sm-4">Employés rattachés</dt>
+                    <dd class="col-sm-8">
+                        @if (Model.Employer.EmployeeIdentifiers.Count > 0)
+                        {
+                            <ul class="mb-0">
+                                @foreach (var employeeIdentifier in Model.Employer.EmployeeIdentifiers)
+                                {
+                                    <li>@employeeIdentifier</li>
+                                }
+                            </ul>
+                        }
+                        else
+                        {
+                            <span class="text-muted">Aucun employé rattaché.</span>
+                        }
+                    </dd>
+                </dl>
+            </div>
+        </section>
+    }
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

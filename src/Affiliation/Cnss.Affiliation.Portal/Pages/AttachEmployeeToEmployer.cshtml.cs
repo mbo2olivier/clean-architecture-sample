@@ -43,6 +43,10 @@ public sealed class AttachEmployeeToEmployerModel : PageModel
             Input = new AttachEmployeeInputModel();
             ModelState.Clear();
         }
+        catch (FluentValidation.ValidationException exception)
+        {
+            ModelState.AddFluentValidationErrors(exception, nameof(Input));
+        }
         catch (Exception exception)
         {
             ErrorMessage = exception.Message;

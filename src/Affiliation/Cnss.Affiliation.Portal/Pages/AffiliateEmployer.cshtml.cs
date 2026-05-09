@@ -39,6 +39,10 @@ public sealed class AffiliateEmployerModel : PageModel
             Input = new AffiliateEmployerInputModel();
             ModelState.Clear();
         }
+        catch (FluentValidation.ValidationException exception)
+        {
+            ModelState.AddFluentValidationErrors(exception, nameof(Input));
+        }
         catch (Exception exception)
         {
             ErrorMessage = exception.Message;
